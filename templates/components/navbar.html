@@ -1,0 +1,18 @@
+{% load static %}
+
+ <nav class="flex items-center justify-between px-6 py-2 bg-transparent">
+  <!-- Left side -->
+  <div class="flex items-center space-x-2">
+    <img src="{% static 'img/bolt.svg' %}" alt="Logo" class="h-8 w-8" />
+       <span class="text-gray-700 font-medium">Welcome, {{ request.user.username }}</span>
+  </div>
+
+
+  <div class="flex items-center space-x-6">
+    {% comment %} <span class="text-gray-700 font-medium">Welcome, {{ request.user.username }}</span> {% endcomment %}
+    <a href="{% url 'logout' %}"
+       class="px-4 py-2 text-sm rounded-md border border-gray-300 hover:bg-black hover:text-white transition-all duration-200">
+      Logout
+    </a>
+  </div>
+</nav>

@@ -2,6 +2,43 @@
 {% load static %}
 
 {% block content %}
-<h1>Welcome to the Dashboard</h1>
-<a href="{% url 'logout' %}">Logout</a>
+<div class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+     style="background-image: url('{% static 'img/dash.jpg' %}');">
+
+  {% include 'components/navbar.html' %}
+
+  <div class="min-h-screen flex items-center justify-center bg-transparent">
+    <div class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-8 w-full max-w-lg text-center">
+
+      <h1 class="text-3xl font-extrabold mb-4 text-[#002147]">Upload Statement</h1>
+      <p class="text-gray-600 mb-6">Select your Mpesa or Bank statement (CSV, PDF, or Excel).</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="mb-4 text-sm text-white {% if message.tags == 'success' %}bg-green-600{% else %}bg-red-600{% endif %} py-2 px-4 rounded-md">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+        {% csrf_token %}
+        <input type="file" name="statement" accept=".csv,.xls,.xlsx,.pdf"
+               class="border px-4 py-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#002147]" required>
+
+        <button type="submit"
+                class="px-6 py-2 bg-black text-white rounded-md hover:bg-[#FBCD03] hover:text-black transition-all duration-300">
+          Upload Statement
+        </button>
+      </form>
+
+      {% if file_url %}
+        <p class="mt-6 text-green-700 font-medium">File uploaded successfully: 
+          <a href="{{ file_url }}" class="underline text-blue-600">View File</a>
+        </p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col lg:flex-row bg-white overflow-hidden">
+  <div class="flex-1 flex items-center justify-center p-4 lg:p-8 relative">
+
+    <div id="home-intro"
+         class="bg-white rounded-lg p-8 w-full max-w-md text-center absolute transition-all duration-450 ease-in-out opacity-100 translate-x-0 pointer-events-auto">
+      <a href="#" class="flex justify-center mb-6">
+        <img src="{% static 'img/bolt.svg' %}" alt="Logo" class="h-10 w-auto" />
+      </a>
+
+      <h1 class="text-3xl lg:text-5xl font-extrabold mb-4">Simplify Tax. Amplify Growth.</h1>
+      <p class="text-base lg:text-lg mb-6">Tulipe Ushuru, Tujitegemee.</p>
+
+      <div class="flex justify-center">
+        <button id="show-login-btn" type="button" class="px-8 py-2 bg-black text-white rounded-md hover:bg-[#FBCD03] hover:text-black">
+          Get started
+        </button>
+      </div>
+    </div>
+
+    <div id="login-form"
+         class="bg-white rounded-lg p-8 w-full max-w-md text-center absolute transition-all duration-450 ease-in-out transform opacity-0 translate-x-6 pointer-events-none">
+      <a href="#" class="flex justify-center mb-6">
+        <img src="{% static 'img/bolt.svg' %}" alt="Logo" class="h-10 w-auto" />
+      </a>
+
+      <form method="POST" action="{% url 'invoice' %}" class="flex flex-col gap-4 justify-center">
+        {% csrf_token %}
+
+        <div class="relative w-full">
+          <label for="kra_pin" class="block mb-1 text-gray-700 font-medium">KRA PIN</label>
+          <input type="text" id="kra_pin" name="kra_pin" placeholder="Enter your KRA PIN"
+                 class="border px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#002147]" required>
+        </div>
+
+        {% if error %}
+        <p class="text-red-600">{{ error }}</p>
+        {% endif %}
+
+        <button type="submit" class="px-6 py-2 bg-black text-white rounded-md hover:bg-[#FBCD03] hover:text-black">
+          NEXT
+        </button>
+      </form>
+
+      <div class="relative my-3">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
+        <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-500">or</span></div>
+      </div>
+
+      <button id="back-home-btn" type="button" class="mt-3 text-black hover:text-black">Cancel</button>
+    </div>
+
+  </div>
+
+  <div class="flex-1 relative w-full h-64 lg:h-auto">
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{% static 'img/herot.jpg' %}');"></div>
+  </div>
+</div>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}
