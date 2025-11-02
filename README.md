@@ -6,3 +6,5 @@ After generating invoices the peron can press a button file returns which connec
 # Update
 THE saf api is an issue legally you cant read people messages mpesa via api so 
 users will have to upload their own statemnts 
+Nishaunda a good upload statement with good messages etc ui i will modify also 
+Nishaunda a place to view list of uploaded statemnts now kitu imebaki nikugenerate etims invoices na kufile returns
