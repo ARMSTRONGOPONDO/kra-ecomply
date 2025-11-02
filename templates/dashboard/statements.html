@@ -23,7 +23,7 @@
       {% if statements %}
         <ul class="divide-y divide-gray-200">
           {% for s in statements %}
-            <li class="py-3 flex items-center justify-between border p-3 border-gray-300 rounded-md">
+            <li class="py-3 flex items-center justify-between border p-3 border-gray-300 rounded-md hover:bg-blue-100">
               <div >
                 <a href="{{ s.file.url }}" target="_blank" class="text-blue-600 hover:underline">
                   {{ s.file.name|slice:"10:" }}
