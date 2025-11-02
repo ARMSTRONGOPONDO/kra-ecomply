@@ -8,9 +8,9 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
-
-
 from ecomply import settings
+from .models import UploadedStatement
+import os
 
 
 class HomePageView(TemplateView):
@@ -48,13 +48,6 @@ class DashboardView(TemplateView):
     template_name = 'dashboard/home.html'
 
 
-
-
-
-
-
-# from requests.auth import HTTPBasicAuth # Not needed anymore, as we are doing manual encoding
-
 class InvoiceView(TemplateView):
     template_name = 'invoice.html'
 
@@ -78,10 +71,41 @@ class UploadStatementView(View):
             messages.error(request, "Please select a file to upload.")
             return redirect('upload_statement')
 
-        # Save file using Django’s built-in file system storage
+       
         fs = FileSystemStorage(location=settings.MEDIA_ROOT)
         filename = fs.save(uploaded_file.name, uploaded_file)
-        file_url = fs.url(filename)
 
-        messages.success(request, f"File '{uploaded_file.name}' uploaded successfully.")
-        return render(request, self.template_name, {'file_url': file_url})
+     
+        UploadedStatement.objects.create(
+            user=request.user,
+            file=f'statements/{uploaded_file.name}'
+        )
+
+        messages.success(request, "Statement uploaded successfully.")
+       
+        return redirect('statements')
+
+
+@method_decorator(login_required, name='dispatch')
+class StatementListView(View):
+    template_name = 'dashboard/statements.html'
+
+    def get(self, request):
+        statements = UploadedStatement.objects.filter(user=request.user).order_by('-uploaded_at')
+        return render(request, self.template_name, {'statements': statements})
+    
+@method_decorator(login_required, name='dispatch')
+class DeleteStatementView(View):
+    def post(self, request, pk):
+        try:
+            statement = UploadedStatement.objects.get(pk=pk, user=request.user)
+          
+            file_path = os.path.join(settings.MEDIA_ROOT, str(statement.file))
+            if os.path.exists(file_path):
+                os.remove(file_path)
+          
+            statement.delete()
+            messages.success(request, "Deleted successfully.")
+        except UploadedStatement.DoesNotExist:
+            messages.error(request, "Statement not found or unauthorized access.")
+        return redirect('statements')
