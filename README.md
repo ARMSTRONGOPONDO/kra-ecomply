@@ -8,3 +8,7 @@ THE saf api is an issue legally you cant read people messages mpesa via api so
 users will have to upload their own statemnts 
 Nishaunda a good upload statement with good messages etc ui i will modify also 
 Nishaunda a place to view list of uploaded statemnts now kitu imebaki nikugenerate etims invoices na kufile returns
+
+The upload statement eneables one to upload their mpesa or bank or airtel statemeent
+then a view named extratew will extract stuff from the statement and create an etims compliant invoice then we can use that to file returns 
+Now look into the extract since sijaanza
