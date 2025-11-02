@@ -27,17 +27,28 @@
         <img src="{% static 'img/bolt.svg' %}" alt="Logo" class="h-10 w-auto" />
       </a>
 
-      <form method="POST" action="#" class="flex flex-col gap-4 justify-center">
-        {% csrf_token %}
-        <div class="relative w-full">
-          <label for="number" class="block mb-1 text-gray-700 font-medium">Enter Number</label>
-          <img src="{% static 'img/number.svg' %}" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input type="number" id="number" name="number" placeholder="number" autocomplete="number"
-                 class="border px-8 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#002147]" required>
-        </div>
+   <form method="POST" action="{% url 'home' %}" class="flex flex-col gap-4 justify-center">
+  {% csrf_token %}
 
-        <button type="submit" name="login" class="px-8 py-2 bg-black text-white rounded-md hover:bg-[#FBCD03] hover:text-black">Confirm</button>
-      </form>
+  <div class="relative w-full">
+    <label for="kra_pin" class="block mb-1 text-gray-700 font-medium">KRA PIN</label>
+    <input type="text" id="username" name="username" placeholder="Enter your KRA PIN"
+           class="border px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#002147]" required>
+  </div>
+
+  <div class="relative w-full">
+    <label for="password" class="block mb-1 text-gray-700 font-medium">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter your password"
+           class="border px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#002147]" required>
+  </div>
+
+ 
+
+  <button type="submit" class="px-6 py-2 bg-black text-white rounded-md hover:bg-[#FBCD03] hover:text-black">
+    Login
+  </button>
+</form>
+
 
       <div class="relative my-3">
         <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
