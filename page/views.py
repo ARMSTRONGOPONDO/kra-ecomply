@@ -48,19 +48,15 @@ class DashboardView(TemplateView):
     template_name = 'dashboard/home.html'
 
 
-class InvoiceView(TemplateView):
-    template_name = 'invoice.html'
-
-
-
-class InsideView(TemplateView):
-    template_name = 'dashboard/in.html'
+@method_decorator(login_required, name='dispatch')
+class UploadStatementView(View):
+    template_name = 'dashboard/home.html'
 
 
 
 @method_decorator(login_required, name='dispatch')
 class UploadStatementView(View):
-    template_name = 'dashboard/home.html'
+    template_name = 'dashboard/upload.html'
 
     def get(self, request):
         return render(request, self.template_name)

@@ -5,27 +5,50 @@
  
   <div class="flex items-center space-x-3">
     <img src="{% static 'img/bolt.svg' %}" alt="Logo" class="h-8 w-8" />
-    {% comment %} <span class="text-gray-800 font-medium">Welcome, {{ request.user.username }}</span> {% endcomment %}
         <span class="text-gray-800 font-medium">Ecomply</span>
   </div>
 
 
-  <div class="flex items-center space-x-6">
-    <a href="{% url 'logout' %}"
-       class="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition duration-200">
-      Logout
-    </a>
-  </div>
+  {% load static %}
+
+<div class="flex items-center space-x-2">
+
+
+  <a href="#" 
+     class="flex items-center space-x-2 text-gray-700 hover:text-red-700 transition duration-200"
+     title="Help">
+    <img src="{% static 'img/help.svg' %}" 
+         alt="Help" 
+         class="w-5 h-5 object-contain">
+    <span class="text-sm font-medium">Help</span>
+  </a>
+
+
+
+ 
+  <a href="{% url 'logout' %}"
+     class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition duration-200"
+     title="Logout">
+    <img src="{% static 'img/logout.svg' %}" 
+         alt="Logout" 
+         class="w-5 h-5 object-contain">
+  </a>
+
+  
+</div>
+
+
+
 </nav>
 
 
 <div class="flex items-center justify-center space-x-6 px-6  border-b border-gray-200 bg-white text-sm font-medium">
-  <a href="#" class="text-gray-800 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-700 pb-2 transition-all duration-200">
+  <a href="{% url 'dashboard' %}" class="text-gray-800 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-700 pb-2 transition-all duration-200">
    Home
   </a>
-  <a href="{% url 'upload_statement' %}" class="text-gray-800 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-700 pb-2 transition-all duration-200">
+  {% comment %} <a href="{% url 'upload_statement' %}" class="text-gray-800 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-700 pb-2 transition-all duration-200">
     Upload 
-  </a>
+  </a> {% endcomment %}
   <a href="{% url 'statements' %}" class="text-gray-800 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-700 pb-2 transition-all duration-200">
      Statements
   </a>

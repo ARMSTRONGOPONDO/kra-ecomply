@@ -2,30 +2,37 @@
 {% load static %}
 
 {% block content %}
-{% comment %} <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
-     style="background-image: url('{% static 'img/dash.jpg' %}');"> {% endcomment %}
+
 
   {% include 'components/navbar.html' %}
 
-  <div class="m-4 flex items-center justify-center bg-transparent">
-    <div class="bg-white bg-opacity-95 rounded-md p-6 w-full max-w-lg text-center">
+{% load static %}
 
-      <h1 class="text-2xl font-medium mb-4 text-gray-600">Upload Statement</h1>
-      {% comment %} <p class="text-gray-600 mb-6">Select your Mpesa or Bank statement (CSV, PDF, or Excel).</p> {% endcomment %}
+<section 
+  class="relative flex items-center justify-end p-4 min-h-[50vh] m-4 rounded-xl overflow-hidden bg-center bg-cover" 
+  style="background-image: url('{% static 'img/mboga.jpg' %}');">
 
 
-      <form method="POST" action="{% url 'upload_statement' %}" enctype="multipart/form-data" class="flex flex-col gap-4">
-        {% csrf_token %}
-        <input type="file" name="statement" accept=".csv,.xls,.xlsx,.pdf"
-               class="border border-gray-300 px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-gray-300" required>
+  <div class="absolute inset-0 bg-black/50"></div>
 
-        <button type="submit"
-                           class="px-4 py-2 border border-gray-300 border-dashed rounded-md text-blue-700 hover:bg-gray-300 hover:text-blue-800 hover:rounded-md transition-all duration-300">
-          Upload Statement
-        </button>
-      </form>
-
-    </div>
+ 
+  <div class="relative z-10 text-white font-bold text-2xl text-right max-w-lg pr-6">
+    <h1 class="mb-4">
+      Welcome {{ request.user.username }}
+    </h1>
+    <p class="text-sm sm:text-base mb-6 font-medium max-w-md mx-auto">
+      This prototype allows you to <strong>upload your M-Pesa or bank statement</strong> 
+      to automatically generate reports and compliant invoices.  
+      In the final version, the system will connect directly to M-Pesa APIs.
+    </p>
+    <a href="{% url 'upload_statement' %}" 
+       class="inline-flex items-center justify-center gap-2 px-3 py-1 mt-2 text-sm font-medium 
+              text-white bg-black hover:bg-red-700 rounded-md transition duration-300">
+      <span>Begin Processing</span>
+      <img src="{% static 'img/white.svg' %}" alt="Next" class="w-4 h-4 ml-1" />
+    </a>
   </div>
-{% comment %} </div> {% endcomment %}
+</section>
+
+
 {% endblock %}
