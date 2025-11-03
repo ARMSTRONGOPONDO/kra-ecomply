@@ -5,39 +5,39 @@
 
 {% include 'components/navbar.html' %}
 
-<div class="flex justify-center px-4 py-6">
+<div class="flex justify-center px-4 py-6 bg-black min-h-screen">
   <div class="w-full max-w-4xl">
 
     {% if messages %}
     <div id="flash-messages" class="fixed top-5 right-5 space-y-2 z-50">
       {% for message in messages %}
-        <div class="text-sm py-2 px-4 rounded-md shadow-md transition-opacity duration-500 {% if message.tags == 'success' %}bg-black text-white{% else %}bg-[#FBCD03] text-black{% endif %}">
+        <div class="text-sm py-2 px-4 rounded-md shadow-md transition-opacity duration-500 {% if message.tags == 'success' %}bg-green-600 text-white{% elif message.tags == 'error' %}bg-red-600 text-white{% else %}bg-[#FBCD03] text-black{% endif %}">
           {{ message }}
         </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <h1 class="text-2xl sm:text-3xl font-medium mb-6 text-gray-600 text-center">Your Invoices</h1>
+    <h1 class="text-2xl sm:text-3xl font-medium mb-6 text-white text-center">Your Invoices</h1>
 
     {% if invoices %}
     <div class="overflow-x-auto">
-      <table class="min-w-full border border-gray-300 text-sm divide-y divide-gray-200">
-        <thead class="bg-gray-100">
+      <table class="min-w-full border border-gray-700 text-sm divide-y divide-gray-700">
+        <thead class="bg-gray-900">
           <tr>
-            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-700 border border-gray-300">Invoice No</th>
-            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-700 border border-gray-300">Buyer</th>
-            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-700 border border-gray-300">Amount (Ksh)</th>
-            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-700 border border-gray-300"> Transaction Date</th>
+            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-200 border border-gray-700">Invoice No</th>
+            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-200 border border-gray-700">Buyer</th>
+            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-200 border border-gray-700">Amount (Ksh)</th>
+            <th class="py-2 px-2 sm:px-3 text-left font-medium text-gray-200 border border-gray-700"> Transaction Date</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-gray-800 divide-y divide-gray-700">
           {% for invoice in invoices %}
-          <tr class="hover:bg-blue-50 transition-colors duration-200">
-            <td class="py-2 px-2 sm:px-3 border border-gray-300 whitespace-nowrap">{{ invoice.number }}</td>
-            <td class="py-2 px-2 sm:px-3 border border-gray-300">{{ invoice.item }}</td>
-            <td class="py-2 px-2 sm:px-3 border border-gray-300">{{ invoice.amount|floatformat:2 }}</td>
-            <td class="py-2 px-2 sm:px-3 border border-gray-300 whitespace-nowrap">{{ invoice.created_at|date:"M d, Y - H:i" }}</td>
+          <tr class="hover:bg-gray-700 transition-colors duration-200">
+            <td class="py-2 px-2 sm:px-3 border border-gray-700 whitespace-nowrap text-white">{{ invoice.number }}</td>
+            <td class="py-2 px-2 sm:px-3 border border-gray-700 text-gray-300">{{ invoice.item }}</td>
+            <td class="py-2 px-2 sm:px-3 border border-gray-700 text-white">{{ invoice.amount|floatformat:2 }}</td>
+            <td class="py-2 px-2 sm:px-3 border border-gray-700 whitespace-nowrap text-gray-300">{{ invoice.created_at|date:"M d, Y - H:i" }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -46,14 +46,14 @@
 
     <div class="mt-6 text-center flex justify-center gap-4">
       <a href="{% url 'download_invoices' %}" 
-         class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg">
+         class="inline-flex items-center px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-[#FBCD03] hover:text-black transition-all duration-300 shadow-md hover:shadow-lg">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         Download as PDF
       </a>
       <a href="{% url 'upload_statement' %}" 
-         class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-100 transition-all duration-300">
+         class="inline-flex items-center px-6 py-3 border border-gray-600 text-white font-medium rounded-md hover:bg-gray-800 transition-all duration-300">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
@@ -61,10 +61,10 @@
       </a>
     </div>
     {% else %}
-      <p class="text-gray-600 text-center mt-4">No invoices generated yet.</p>
+      <p class="text-gray-300 text-center mt-4">No invoices generated yet.</p>
       <div class="mt-6 text-center">
         <a href="{% url 'upload_statement' %}" 
-           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-all duration-300 shadow-md">
+           class="inline-flex items-center px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-[#FBCD03] hover:text-black transition-all duration-300 shadow-md">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>

@@ -6,30 +6,30 @@
 
   {% include 'components/navbar.html' %}
 
-  <div class="m-4 flex items-center justify-center bg-transparent">
-    <div class="bg-white bg-opacity-95 rounded-md p-6 w-full max-w-lg text-center">
+  <div class="m-4 flex items-center justify-center bg-black min-h-screen">
+    <div class="bg-gray-900 border border-gray-700 rounded-md p-6 w-full max-w-lg text-center">
 
       {% if messages %}
       <div id="flash-messages" class="mb-4 space-y-2">
         {% for message in messages %}
-          <div class="text-sm py-2 px-4 rounded-md shadow-md transition-opacity duration-500 {% if message.tags == 'success' %}bg-black text-white{% elif message.tags == 'error' %}bg-red-500 text-white{% else %}bg-[#FBCD03] text-black{% endif %}">
+          <div class="text-sm py-2 px-4 rounded-md shadow-md transition-opacity duration-500 {% if message.tags == 'success' %}bg-green-600 text-white{% elif message.tags == 'error' %}bg-red-600 text-white{% else %}bg-[#FBCD03] text-black{% endif %}">
             {{ message }}
           </div>
         {% endfor %}
       </div>
       {% endif %}
 
-      <h1 class="text-2xl font-medium mb-4 text-gray-600">Upload Statement</h1>
+      <h1 class="text-2xl font-medium mb-4 text-white">Upload Statement</h1>
       {% comment %} <p class="text-gray-600 mb-6">Select your Mpesa or Bank statement (CSV, PDF, or Excel).</p> {% endcomment %}
 
 
       <form method="POST" action="{% url 'upload_statement' %}" enctype="multipart/form-data" class="flex flex-col gap-4">
         {% csrf_token %}
         <input type="file" name="statement" accept=".csv,.xls,.xlsx,.pdf"
-               class="border border-gray-300 px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-gray-300" required>
+               class="border border-gray-600 bg-gray-800 text-white px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#FBCD03] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-[#FBCD03]" required>
 
         <button type="submit"
-                           class="px-4 py-2 border border-gray-300 border-dashed rounded-md text-blue-700 hover:bg-gray-300 hover:text-blue-800 hover:rounded-md transition-all duration-300">
+                           class="px-4 py-2 bg-white text-black font-medium rounded-md hover:bg-[#FBCD03] hover:text-black transition-all duration-300">
           Upload Statement
         </button>
       </form>
