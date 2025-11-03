@@ -71,7 +71,7 @@ class UploadStatementView(View):
         filename = fs.save(uploaded_file.name, uploaded_file)
         file_path = os.path.join(settings.MEDIA_ROOT, filename)
 
-       
+        # Save UploadedStatement record
         UploadedStatement.objects.create(
             user=request.user,
             file=f'statements/{uploaded_file.name}'
@@ -82,7 +82,6 @@ class UploadStatementView(View):
             for page in doc:
                 pdf_text += page.get_text("text")
 
-   
         lines = [line.strip() for line in pdf_text.splitlines() if line.strip()]
 
         invoice_count = 0
@@ -91,7 +90,7 @@ class UploadStatementView(View):
         while i < len(lines):
             line = lines[i]
 
-        
+         
             if line.isalnum() and 8 <= len(line) <= 12:
                 try:
                     receipt_no = line
@@ -104,8 +103,9 @@ class UploadStatementView(View):
 
                     amount = float(paid_in.replace(",", ""))
 
-                
+                   
                     Invoice.objects.create(
+                        user=request.user,
                         number=receipt_no[:8],
                         item=details,
                         amount=amount
@@ -123,6 +123,7 @@ class UploadStatementView(View):
             messages.success(request, f"{invoice_count} invoices generated successfully.")
 
         return redirect('invoices')
+
 
 @method_decorator(login_required, name='dispatch')
 class StatementListView(View):
@@ -155,8 +156,4 @@ class InvoiceListView(View):
 
     def get(self, request):
         invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
-
-        context = {
-            'invoices': invoices
-        }
-        return render(request, self.template_name, context)
+        return render(request, self.template_name, {'invoices': invoices})
