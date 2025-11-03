@@ -33,11 +33,14 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') if os.environ.ge
 
 # CSRF Settings for Railway
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.railway.app',
-    'https://*.up.railway.app',
+    'https://web-production-7190.up.railway.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
+
+# Get Railway domain from environment if available
+if 'RAILWAY_PUBLIC_DOMAIN' in os.environ:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}")
 
 # Application definition
 
