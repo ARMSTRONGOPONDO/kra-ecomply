@@ -15,8 +15,6 @@ python3 manage.py collectstatic --noinput
 # Run migrations
 python3 manage.py migrate --noinput
 
-# Create superuser if credentials provided
-if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-    echo "Creating superuser..."
-    python3 create_superuser.py
-fi
+# Create default users (admin/admin and user/user)
+echo "Creating default users..."
+python3 create_superuser.py
