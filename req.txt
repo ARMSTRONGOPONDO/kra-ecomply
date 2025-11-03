@@ -1,2 +1,0 @@
-pipenv - virtual env install through pipenv shell
-django tailwind -- install it 

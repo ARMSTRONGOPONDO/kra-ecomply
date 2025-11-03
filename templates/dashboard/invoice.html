@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% include 'components/navbar.html' %}
+
+<div class="m-4 flex items-center justify-center">
+  <div class=" py-3 px-1 w-3/4 max-w-4xl ">
+
+    {% if messages %}
+    <div id="flash-messages" class="fixed top-5 right-5 space-y-2 z-50">
+      {% for message in messages %}
+        <div class="text-sm py-2 px-4 rounded-md shadow-md transition-opacity duration-500 {% if message.tags == 'success' %}bg-black text-white{% else %}bg-[#FBCD03] text-black{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h1 class="text-2xl font-medium mb-6 text-gray-600 text-center">Generated Invoices</h1>
+
+    {% if invoices %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-300 text-sm divide-y divide-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="py-3 px-1 text-left font-medium text-gray-700 border border-gray-300">Invoice No</th>
+            <th class="py-3 px-1 text-left font-medium text-gray-700 border border-gray-300">Item</th>
+            <th class="py-3 px-1 text-left font-medium text-gray-700 border border-gray-300">Amount (Ksh)</th>
+            <th class="py-3 px-1 text-left font-medium text-gray-700 border border-gray-300">Date</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for invoice in invoices %}
+          <tr class="hover:bg-blue-50 transition-colors duration-200">
+            <td class="py-3 px-1 border border-gray-300 ">{{ invoice.number }}</td>
+            <td class="py-3 px-1 border border-gray-300">{{ invoice.item }}</td>
+            <td class="py-3 px-1 border border-gray-300">{{ invoice.amount|floatformat:2 }}</td>
+            <td class="py-3 px-1 border border-gray-300">{{ invoice.created_at|date:"M d, Y - H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-gray-600 text-center">No invoices generated yet.</p>
+    {% endif %}
+
+    <div class="mt-6 text-center">
+      <a href="{% url 'upload_statement' %}" 
+         class="px-4 py-2 border border-gray-300 border-dashed rounded-md text-blue-500 hover:bg-gray-300 hover:text-blue-800 transition-all duration-300">
+        Upload Statement to generate invoices
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script src="{% static 'js/message.js' %}"></script>
+
+{% endblock %}
