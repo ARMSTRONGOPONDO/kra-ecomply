@@ -6,8 +6,9 @@ set -o errexit
 # Install dependencies
 python3 -m pip install -r requirements.txt
 
-# Create staticfiles directory if it doesn't exist
+# Create necessary directories
 mkdir -p staticfiles
+mkdir -p media
 
 # Collect static files
 python3 manage.py collectstatic --noinput

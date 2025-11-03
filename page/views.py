@@ -67,62 +67,70 @@ class UploadStatementView(View):
             messages.error(request, "Please select a file to upload.")
             return redirect('upload_statement')
 
-        fs = FileSystemStorage(location=settings.MEDIA_ROOT)
-        filename = fs.save(uploaded_file.name, uploaded_file)
-        file_path = os.path.join(settings.MEDIA_ROOT, filename)
+        try:
+            # Ensure media directory exists
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            
+            fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+            filename = fs.save(uploaded_file.name, uploaded_file)
+            file_path = os.path.join(settings.MEDIA_ROOT, filename)
 
-        # Save UploadedStatement record
-        UploadedStatement.objects.create(
-            user=request.user,
-            file=f'statements/{uploaded_file.name}'
-        )
+            # Save UploadedStatement record
+            UploadedStatement.objects.create(
+                user=request.user,
+                file=filename
+            )
 
-        pdf_text = ""
-        with fitz.open(file_path) as doc:
-            for page in doc:
-                pdf_text += page.get_text("text")
+            pdf_text = ""
+            with fitz.open(file_path) as doc:
+                for page in doc:
+                    pdf_text += page.get_text("text")
 
-        lines = [line.strip() for line in pdf_text.splitlines() if line.strip()]
+            lines = [line.strip() for line in pdf_text.splitlines() if line.strip()]
 
-        invoice_count = 0
-        i = 0
+            invoice_count = 0
+            i = 0
 
-        while i < len(lines):
-            line = lines[i]
+            while i < len(lines):
+                line = lines[i]
 
-         
-            if line.isalnum() and 8 <= len(line) <= 12:
-                try:
-                    receipt_no = line
-                    completion_time = lines[i + 1] 
-                    details = lines[i + 2]         
-                    transaction_status = lines[i + 3]  
-                    paid_in = lines[i + 4]
-                    withdraw = lines[i + 5]         
-                    balance = lines[i + 6]         
+             
+                if line.isalnum() and 8 <= len(line) <= 12:
+                    try:
+                        receipt_no = line
+                        completion_time = lines[i + 1] 
+                        details = lines[i + 2]         
+                        transaction_status = lines[i + 3]  
+                        paid_in = lines[i + 4]
+                        withdraw = lines[i + 5]         
+                        balance = lines[i + 6]         
 
-                    amount = float(paid_in.replace(",", ""))
+                        amount = float(paid_in.replace(",", ""))
 
-                   
-                    Invoice.objects.create(
-                        user=request.user,
-                        number=receipt_no[:8],
-                        item=details,
-                        amount=amount
-                    )
-                    invoice_count += 1
-                    i += 7 
-                except (IndexError, ValueError):
-                    i += 1  
+                       
+                        Invoice.objects.create(
+                            user=request.user,
+                            number=receipt_no[:8],
+                            item=details,
+                            amount=amount
+                        )
+                        invoice_count += 1
+                        i += 7 
+                    except (IndexError, ValueError):
+                        i += 1  
+                else:
+                    i += 1
+
+            if invoice_count == 0:
+                messages.warning(request, "No transactions were detected in the uploaded statement.")
             else:
-                i += 1
+                messages.success(request, f"{invoice_count} invoices generated successfully.")
 
-        if invoice_count == 0:
-            messages.warning(request, "No transactions were detected in the uploaded statement.")
-        else:
-            messages.success(request, f"{invoice_count} invoices generated successfully.")
-
-        return redirect('invoices')
+            return redirect('invoices')
+            
+        except Exception as e:
+            messages.error(request, f"Upload failed: {str(e)}")
+            return redirect('upload_statement')
 
 
 @method_decorator(login_required, name='dispatch')
