@@ -9,6 +9,7 @@ urlpatterns = [
     path('upload/', UploadStatementView.as_view(), name='upload_statement'),
     path('statements/', StatementListView.as_view(), name='statements'),
     path('invoices/', InvoiceListView.as_view(), name='invoices'),
+    path('invoices/download/', DownloadInvoicesPDFView.as_view(), name='download_invoices'),
     path('statements/delete/<int:pk>/', DeleteStatementView.as_view(), name='delete_statement'),
     path('logout/', LogoutView.as_view(), name='logout'),
     

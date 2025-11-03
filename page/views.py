@@ -8,12 +8,22 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse
 from ecomply import settings
 from .models import UploadedStatement ,Invoice
 import os
 import fitz
 import logging
 import traceback
+import csv
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+from io import BytesIO
+from datetime import datetime
 
 logger = logging.getLogger(__name__)  
 
@@ -92,20 +102,49 @@ class UploadStatementView(View):
                 logger.error(f"Database error creating UploadedStatement: {str(db_error)}")
                 raise
 
-            # Parse PDF
-            try:
-                pdf_text = ""
-                with fitz.open(file_path) as doc:
-                    for page in doc:
-                        pdf_text += page.get_text("text")
-                logger.info(f"PDF parsed, extracted {len(pdf_text)} characters")
-            except Exception as pdf_error:
-                logger.error(f"PDF parsing error: {str(pdf_error)}")
-                messages.error(request, "Failed to read PDF file. Please ensure it's a valid PDF.")
+            # Detect file type and parse accordingly
+            file_extension = os.path.splitext(filename)[1].lower()
+            logger.info(f"File type detected: {file_extension}")
+            
+            lines = []
+            
+            if file_extension == '.pdf':
+                # Parse PDF
+                try:
+                    pdf_text = ""
+                    with fitz.open(file_path) as doc:
+                        for page in doc:
+                            pdf_text += page.get_text("text")
+                    logger.info(f"PDF parsed, extracted {len(pdf_text)} characters")
+                    lines = [line.strip() for line in pdf_text.splitlines() if line.strip()]
+                except Exception as pdf_error:
+                    logger.error(f"PDF parsing error: {str(pdf_error)}")
+                    messages.error(request, "Failed to read PDF file. Please ensure it's a valid PDF.")
+                    return redirect('upload_statement')
+                    
+            elif file_extension == '.csv':
+                # Parse CSV
+                try:
+                    with open(file_path, 'r', encoding='utf-8-sig') as csvfile:
+                        # Read all rows
+                        csv_reader = csv.reader(csvfile)
+                        for row in csv_reader:
+                            # Add each cell as a line
+                            for cell in row:
+                                if cell.strip():
+                                    lines.append(cell.strip())
+                    logger.info(f"CSV parsed, extracted {len(lines)} cells")
+                except Exception as csv_error:
+                    logger.error(f"CSV parsing error: {str(csv_error)}")
+                    messages.error(request, "Failed to read CSV file. Please ensure it's a valid CSV.")
+                    return redirect('upload_statement')
+                    
+            else:
+                logger.error(f"Unsupported file type: {file_extension}")
+                messages.error(request, f"Unsupported file type: {file_extension}. Please upload a PDF or CSV file.")
                 return redirect('upload_statement')
-
-            lines = [line.strip() for line in pdf_text.splitlines() if line.strip()]
-            logger.info(f"Extracted {len(lines)} lines from PDF")
+            
+            logger.info(f"Extracted {len(lines)} lines from file")
 
             invoice_count = 0
             i = 0
@@ -193,3 +232,132 @@ class InvoiceListView(View):
     def get(self, request):
         invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
         return render(request, self.template_name, {'invoices': invoices})
+
+
+@method_decorator(login_required, name='dispatch')
+class DownloadInvoicesPDFView(View):
+    def get(self, request):
+        # Get all invoices for the user
+        invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
+        
+        if not invoices.exists():
+            messages.warning(request, "No invoices to download.")
+            return redirect('invoices')
+        
+        # Create PDF in memory
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+        
+        # Container for PDF elements
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#1a202c'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.HexColor('#4a5568'),
+            spaceAfter=20,
+            alignment=TA_CENTER
+        )
+        
+        # Add title
+        title = Paragraph("Invoice Report", title_style)
+        elements.append(title)
+        
+        # Add date and user info
+        date_info = Paragraph(f"Generated on: {datetime.now().strftime('%B %d, %Y at %H:%M')}<br/>User: {request.user.username}", subtitle_style)
+        elements.append(date_info)
+        elements.append(Spacer(1, 20))
+        
+        # Create table data
+        data = [['Invoice No', 'Description', 'Amount (Ksh)', 'Date']]
+        
+        total_amount = 0
+        for invoice in invoices:
+            data.append([
+                invoice.number,
+                invoice.item[:50],  # Truncate long descriptions
+                f"{invoice.amount:,.2f}",
+                invoice.created_at.strftime('%b %d, %Y')
+            ])
+            total_amount += float(invoice.amount)
+        
+        # Add total row
+        data.append(['', '', f"Total: {total_amount:,.2f}", ''])
+        
+        # Create table
+        table = Table(data, colWidths=[1.5*inch, 3*inch, 1.5*inch, 1.5*inch])
+        
+        # Style the table
+        table.setStyle(TableStyle([
+            # Header styling
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2d3748')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            
+            # Body styling
+            ('BACKGROUND', (0, 1), (-1, -2), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -2), colors.black),
+            ('ALIGN', (0, 1), (0, -2), 'LEFT'),
+            ('ALIGN', (2, 1), (2, -2), 'RIGHT'),
+            ('FONTNAME', (0, 1), (-1, -2), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -2), 10),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -2), [colors.white, colors.HexColor('#f7fafc')]),
+            
+            # Total row styling
+            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#edf2f7')),
+            ('TEXTCOLOR', (0, -1), (-1, -1), colors.black),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, -1), (-1, -1), 12),
+            ('ALIGN', (2, -1), (2, -1), 'RIGHT'),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ]))
+        
+        elements.append(table)
+        
+        # Add footer
+        elements.append(Spacer(1, 30))
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.HexColor('#718096'),
+            alignment=TA_CENTER
+        )
+        footer = Paragraph(f"Total Invoices: {invoices.count()} | Generated by eComply System", footer_style)
+        elements.append(footer)
+        
+        # Build PDF
+        doc.build(elements)
+        
+        # Get PDF from buffer
+        pdf = buffer.getvalue()
+        buffer.close()
+        
+        # Create response
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoices_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        response.write(pdf)
+        
+        logger.info(f"User {request.user.username} downloaded {invoices.count()} invoices as PDF")
+        
+        return response
