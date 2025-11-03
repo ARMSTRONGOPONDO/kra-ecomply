@@ -11,7 +11,11 @@ from django.core.files.storage import FileSystemStorage
 from ecomply import settings
 from .models import UploadedStatement ,Invoice
 import os
-import fitz  
+import fitz
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)  
 
 class HomePageView(TemplateView):
     template_name = 'hero.html'
@@ -75,18 +79,33 @@ class UploadStatementView(View):
             filename = fs.save(uploaded_file.name, uploaded_file)
             file_path = os.path.join(settings.MEDIA_ROOT, filename)
 
-            # Save UploadedStatement record
-            UploadedStatement.objects.create(
-                user=request.user,
-                file=filename
-            )
+            logger.info(f"File saved: {file_path}")
 
-            pdf_text = ""
-            with fitz.open(file_path) as doc:
-                for page in doc:
-                    pdf_text += page.get_text("text")
+            # Save UploadedStatement record
+            try:
+                UploadedStatement.objects.create(
+                    user=request.user,
+                    file=filename
+                )
+                logger.info(f"UploadedStatement created for user {request.user.username}")
+            except Exception as db_error:
+                logger.error(f"Database error creating UploadedStatement: {str(db_error)}")
+                raise
+
+            # Parse PDF
+            try:
+                pdf_text = ""
+                with fitz.open(file_path) as doc:
+                    for page in doc:
+                        pdf_text += page.get_text("text")
+                logger.info(f"PDF parsed, extracted {len(pdf_text)} characters")
+            except Exception as pdf_error:
+                logger.error(f"PDF parsing error: {str(pdf_error)}")
+                messages.error(request, "Failed to read PDF file. Please ensure it's a valid PDF.")
+                return redirect('upload_statement')
 
             lines = [line.strip() for line in pdf_text.splitlines() if line.strip()]
+            logger.info(f"Extracted {len(lines)} lines from PDF")
 
             invoice_count = 0
             i = 0
@@ -115,21 +134,30 @@ class UploadStatementView(View):
                             amount=amount
                         )
                         invoice_count += 1
+                        logger.info(f"Invoice created: {receipt_no[:8]} - {details} - {amount}")
                         i += 7 
-                    except (IndexError, ValueError):
+                    except (IndexError, ValueError) as parse_error:
+                        logger.debug(f"Skipping line {i}: {parse_error}")
                         i += 1  
+                    except Exception as invoice_error:
+                        logger.error(f"Error creating invoice at line {i}: {str(invoice_error)}")
+                        i += 1
                 else:
                     i += 1
 
+            logger.info(f"Total invoices created: {invoice_count}")
+
             if invoice_count == 0:
-                messages.warning(request, "No transactions were detected in the uploaded statement.")
+                messages.warning(request, "No transactions were detected in the uploaded statement. Please check the format.")
             else:
                 messages.success(request, f"{invoice_count} invoices generated successfully.")
 
             return redirect('invoices')
             
         except Exception as e:
-            messages.error(request, f"Upload failed: {str(e)}")
+            error_details = traceback.format_exc()
+            logger.error(f"Upload failed for user {request.user.username}: {error_details}")
+            messages.error(request, f"Upload failed: {str(e)}. Please check the file format and try again.")
             return redirect('upload_statement')
 
 
