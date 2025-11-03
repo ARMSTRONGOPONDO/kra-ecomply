@@ -11,4 +11,6 @@ Nishaunda a place to view list of uploaded statemnts now kitu imebaki nikugenera
 
 The upload statement eneables one to upload their mpesa or bank or airtel statemeent
 then a view named extratew will extract stuff from the statement and create an etims compliant invoice then we can use that to file returns 
-Now look into the extract since sijaanza
+Extract done
+invoice generation done
+KRA filing retrun remianing
